@@ -33,9 +33,7 @@ public class InvinciblePatches {
                     PreModifiedField.preModified.set(DamageModifierManager.getInstigator(info), false);
                     __result[0] = originalDamage;
                 } else {
-                    int fullDamage = originalAmount;
-                    int reducedDamage = (int) Math.max(InvincibleNerfMod.atLeastOne ? 1 : 0, (originalDamage - originalAmount) * (1 - InvincibleNerfMod.reductionPercent/100f));
-                    __result[0] = fullDamage + reducedDamage;
+                    __result[0] = (int) getReducedDamage(originalAmount, originalDamage);
                 }
             }
             return __result[0];
@@ -47,6 +45,10 @@ public class InvinciblePatches {
             return PreModifiedField.preModified.get(o);
         }
         return false;
+    }
+
+    public static float getReducedDamage(int stacks, float damage) {
+        return stacks + Math.max(InvincibleNerfMod.atLeastOne ? 1 : 0, (damage - stacks) * (1 - InvincibleNerfMod.reductionPercent/100f));
     }
 
     @SpirePatch2(clz = InvinciblePower.class, method = "updateDescription")
@@ -96,9 +98,8 @@ public class InvinciblePatches {
     public static float calcDamage(int stacks, float damage, AbstractCard card) {
         if (InvincibleNerfMod.modEnabled) {
             if (damage > stacks) {
-                float reducedDamage = (int) Math.max(InvincibleNerfMod.atLeastOne ? 1 : 0, (damage - stacks) * (1 - InvincibleNerfMod.reductionPercent/100f));
                 PreModifiedField.preModified.set(card, true);
-                return (float) stacks + reducedDamage;
+                return getReducedDamage(stacks, damage);
             }
         }
         return damage;

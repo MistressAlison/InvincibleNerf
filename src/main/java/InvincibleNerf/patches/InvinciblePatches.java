@@ -1,16 +1,21 @@
 package InvincibleNerf.patches;
 
 import InvincibleNerf.InvincibleNerfMod;
-import com.evacipated.cardcrawl.modthespire.lib.ByRef;
-import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
-import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
-import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
+import com.evacipated.cardcrawl.mod.stslib.damagemods.DamageModifierManager;
+import com.evacipated.cardcrawl.modthespire.lib.*;
+import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.DamageInfo;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.localization.UIStrings;
 import com.megacrit.cardcrawl.powers.InvinciblePower;
+import javassist.*;
 
 public class InvinciblePatches {
+    @SpirePatch(clz = AbstractCard.class, method = SpirePatch.CLASS)
+    public static class PreModifiedField {
+        public static SpireField<Boolean> preModified = new SpireField<>(() -> false);
+    }
+
     @SpirePatch2(clz = InvinciblePower.class, method = "onAttackedToChangeDamage")
     public static class NerfTime {
         static int originalDamage = 0;
@@ -22,14 +27,26 @@ public class InvinciblePatches {
         }
 
         @SpirePostfixPatch
-        public static int nerf(@ByRef int[] __result, InvinciblePower __instance) {
+        public static int nerf(@ByRef int[] __result, InvinciblePower __instance, DamageInfo info) {
             if (originalDamage > __result[0] && InvincibleNerfMod.modEnabled) {
-                int fullDamage = originalAmount;
-                int reducedDamage = (int) Math.max(InvincibleNerfMod.atLeastOne ? 1 : 0, (originalDamage - originalAmount) * (1 - InvincibleNerfMod.reductionPercent/100f));
-                __result[0] = fullDamage + reducedDamage;
+                if (cardPreModified(DamageModifierManager.getInstigator(info))) {
+                    PreModifiedField.preModified.set(DamageModifierManager.getInstigator(info), false);
+                    __result[0] = originalDamage;
+                } else {
+                    int fullDamage = originalAmount;
+                    int reducedDamage = (int) Math.max(InvincibleNerfMod.atLeastOne ? 1 : 0, (originalDamage - originalAmount) * (1 - InvincibleNerfMod.reductionPercent/100f));
+                    __result[0] = fullDamage + reducedDamage;
+                }
             }
             return __result[0];
         }
+    }
+
+    public static boolean cardPreModified(Object o) {
+        if (o instanceof AbstractCard) {
+            return PreModifiedField.preModified.get(o);
+        }
+        return false;
     }
 
     @SpirePatch2(clz = InvinciblePower.class, method = "updateDescription")
@@ -57,5 +74,33 @@ public class InvinciblePatches {
                 }
             }
         }
+    }
+
+    @SpirePatch2(clz = InvinciblePower.class, method = SpirePatch.CONSTRUCTOR)
+    public static class AddAtDamageReceive {
+        @SpireRawPatch
+        public static void addMethod(CtBehavior ctMethodToPatch) throws NotFoundException, CannotCompileException {
+            CtClass ctClass = ctMethodToPatch.getDeclaringClass();
+            ClassPool classPool = ctClass.getClassPool();
+            CtClass damageTypeClass = classPool.get(DamageInfo.DamageType.class.getName());
+            CtClass abstractCardClass = classPool.get(AbstractCard.class.getName());
+            CtMethod method2 = CtNewMethod.make(CtClass.floatType, "atDamageFinalReceive", new CtClass[]{CtPrimitiveType.floatType, damageTypeClass, abstractCardClass},null,
+                    "{" +
+                            "return "+InvinciblePatches.class.getName()+".calcDamage(amount, $1, $3);" +
+                            "}",
+                    ctClass);
+            ctClass.addMethod(method2);
+        }
+    }
+
+    public static float calcDamage(int stacks, float damage, AbstractCard card) {
+        if (InvincibleNerfMod.modEnabled) {
+            if (damage > stacks) {
+                float reducedDamage = (int) Math.max(InvincibleNerfMod.atLeastOne ? 1 : 0, (damage - stacks) * (1 - InvincibleNerfMod.reductionPercent/100f));
+                PreModifiedField.preModified.set(card, true);
+                return (float) stacks + reducedDamage;
+            }
+        }
+        return damage;
     }
 }

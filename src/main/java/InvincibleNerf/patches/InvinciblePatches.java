@@ -3,9 +3,11 @@ package InvincibleNerf.patches;
 import InvincibleNerf.InvincibleNerfMod;
 import com.evacipated.cardcrawl.mod.stslib.damagemods.DamageModifierManager;
 import com.evacipated.cardcrawl.modthespire.lib.*;
+import com.megacrit.cardcrawl.actions.AbstractGameAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.cards.DamageInfo;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.localization.UIStrings;
 import com.megacrit.cardcrawl.powers.InvinciblePower;
 import javassist.*;
@@ -30,8 +32,14 @@ public class InvinciblePatches {
         public static int nerf(@ByRef int[] __result, InvinciblePower __instance, DamageInfo info) {
             if (originalDamage > __result[0] && InvincibleNerfMod.modEnabled) {
                 if (cardPreModified(DamageModifierManager.getInstigator(info))) {
-                    PreModifiedField.preModified.set(DamageModifierManager.getInstigator(info), false);
                     __result[0] = originalDamage;
+                    AbstractDungeon.actionManager.addToBottom(new AbstractGameAction() {
+                        @Override
+                        public void update() {
+                            PreModifiedField.preModified.set(DamageModifierManager.getInstigator(info), false);
+                            this.isDone = true;
+                        }
+                    });
                 } else {
                     __result[0] = (int) getReducedDamage(originalAmount, originalDamage);
                 }

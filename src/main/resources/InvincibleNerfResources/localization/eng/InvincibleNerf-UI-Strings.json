@@ -11,6 +11,6 @@
             "Can only lose #b%d more HP this turn before ALL damage taken is reduced to 1.",
             "Receives #b%s less damage this turn.",
             "Reduce ALL damage taken and HP loss to #b1 this turn.",
-            " Damage will not reduced below 1."]
+            " Damage will not be reduced below 1."]
   }
 }

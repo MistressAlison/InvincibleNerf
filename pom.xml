@@ -6,7 +6,7 @@
     <groupId>InvincibleNerf</groupId>
     <artifactId>InvincibleNerf</artifactId> <!--Keep a note of this one: this is the ID used in the "auto add cards" method-->
     <name>Invincible Nerf</name>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <description>Nerfs Invincible.</description>
 
     <properties>

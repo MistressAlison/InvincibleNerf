@@ -70,13 +70,13 @@ public class InvinciblePatches {
                     if (InvincibleNerfMod.reductionPercent == 100) {
                         __instance.description = String.format(TEXT[1], __instance.amount);
                     } else {
-                        __instance.description = String.format(TEXT[0], __instance.amount, InvincibleNerfMod.reductionPercent + "%");
+                        __instance.description = String.format(TEXT[0], __instance.amount, InvincibleNerfMod.reductionPercent);
                     }
                 } else {
                     if (InvincibleNerfMod.reductionPercent == 100) {
                         __instance.description = TEXT[3];
                     } else {
-                        __instance.description = String.format(TEXT[2], InvincibleNerfMod.reductionPercent + "%");
+                        __instance.description = String.format(TEXT[2], InvincibleNerfMod.reductionPercent);
                     }
                 }
                 if (InvincibleNerfMod.atLeastOne && InvincibleNerfMod.reductionPercent != 100) {

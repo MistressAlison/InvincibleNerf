@@ -145,7 +145,7 @@ public class InvincibleNerfMod implements
         ModMinMaxSlider reductionSlider = new ModMinMaxSlider("",
                 400f + sliderOffset,
                 currentYposition + 7f,
-                0, 100, INConfig.getInt(REDUCTION_PERFECT), "%.0f", settingsPanel, slider -> {
+                0, 100, INConfig.getInt(REDUCTION_PERFECT), "%.0f%%", settingsPanel, slider -> {
             INConfig.setInt(REDUCTION_PERFECT, Math.round(slider.getValue()));
             reductionPercent = Math.round(slider.getValue());
             try {INConfig.save();} catch (IOException e) {e.printStackTrace();}

@@ -3,13 +3,13 @@
     "TEXT": [
       "Enable Mod",
       "Always Deal At Least 1 Damage",
-      "Damage Reduction Percent:"
+      "Damage Reduction:"
     ]
   },
   "InvincibleNerf:InvincibleText": {
-    "TEXT": ["Can only lose #b%d more HP this turn before it receives #b%s less damage.",
+    "TEXT": ["Can only lose #b%d more HP this turn before it receives #b%d%% less damage.",
             "Can only lose #b%d more HP this turn before ALL damage taken is reduced to 1.",
-            "Receives #b%s less damage this turn.",
+            "Receives #b%d%% less damage this turn.",
             "Reduce ALL damage taken and HP loss to #b1 this turn.",
             " Damage will not be reduced below 1."]
   }
